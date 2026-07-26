@@ -60,6 +60,34 @@ Or just ask naturally in any repo:
 The tour proposes a short itinerary, gets your nod, and starts. Interrupt it whenever you
 like — that's the point.
 
+## What a tour feels like
+
+A condensed moment from a real session (touring the Redis source):
+
+> **Claude:** …so `serverCron` is Redis's janitor — expiry sweeps, hash-table resizing,
+> replication pings all hang off this one heartbeat, re-armed by its own return value
+> (`return 1000/server.hz;` — server.c:1562).
+>
+> Checkpoint:
+> - **Stop 2** — follow real bytes: a client sends `GET foo` and we trace it to
+>   `processCommand` at server.c:4455
+> - **Linger** — where the loop's timers are stored (it's charmingly unsophisticated)
+> - Or take us somewhere else
+>
+> **User:** ok so if I somehow turned off the janitor and there were no scheduled tasks,
+> it would sleep forever?
+>
+> **Claude:** Exactly right — and we already saw the line that proves it. At ae.c:380:
+> `struct timeval tv, *tvp = NULL; /* NULL means infinite wait. */` — no timers → the
+> kernel is told "no deadline at all." One precision though: you turned off the alarm
+> clock, not the doorbell. A client socket still wakes it instantly. And here's the fun
+> part — you can now *predict* what breaks: keys you touch still expire (lazy path), but
+> snapshots never trigger, idle clients never time out, and my favorite: `SIGTERM` is
+> ignored — the signal handler only sets a flag *that serverCron reads*. You disabled its
+> ability to die politely.
+
+Questions redirect the tour; the tour follows, then offers the way back.
+
 ## Tips from real tours
 
 - **Articulate your model back.** Explaining a stop in your own words and asking Claude to
