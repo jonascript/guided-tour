@@ -1,5 +1,6 @@
 ---
 name: guided-tour
+allowed-tools: Read, Grep, Glob, Task, Artifact
 description: >
   Run a live, interactive guided tour of a codebase — you act as a hands-on tutor who
   leads the user through how the code actually works, one digestible piece at a time,
